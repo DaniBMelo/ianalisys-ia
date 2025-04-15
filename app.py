@@ -37,7 +37,7 @@ def carregar_base():
     docs.extend(splitter.split_documents(paginas_docx))
 
     # Criar a base vetorial com Chroma
-    vectorstore = Chroma.from_documents(docs, embedding=embedding)
+    vectorstore = Chroma.from_documents(docs, embedding=embedding, persist_directory=None)
     return vectorstore
 
 vectorstore = carregar_base()
