@@ -2,7 +2,7 @@ streamlit
 langchain
 langchain-community
 langchain-openai
-chromadb
+faiss-cpu
 pypdf
 unstructured
 python-docx
