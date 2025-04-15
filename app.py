@@ -3,10 +3,14 @@ import streamlit as st
 from langchain_community.document_loaders import PyPDFLoader, UnstructuredWordDocumentLoader
 from langchain_text_splitters import RecursiveCharacterTextSplitter
 from langchain.vectorstores import Chroma
-from langchain.embeddings import OpenAIEmbeddings
 from langchain_openai import ChatOpenAI
 from langchain.chains import ConversationalRetrievalChain
 import os
+from langchain.embeddings import OpenAIEmbeddings
+
+#Lê a chave da OpenAI dos segredos do Streamlit
+OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
+embedding = OpenAIEmbeddings(openai_api_key=OPENAI_API_KEY)
 
 st.set_page_config(page_title="IAnalisys - Neuropsicanálise e Autismo", layout="wide")
 st.title("🧠 IAnalisys – IA em Neuropsicanálise e Autismo")
@@ -33,7 +37,7 @@ def carregar_base():
     docs.extend(splitter.split_documents(paginas_docx))
 
     # Criar a base vetorial com Chroma
-    vectorstore = Chroma.from_documents(docs, embedding=OpenAIEmbeddings())
+    vectorstore = Chroma.from_documents(docs, embedding=embedding)
     return vectorstore
 
 vectorstore = carregar_base()
