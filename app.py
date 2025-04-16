@@ -71,9 +71,6 @@ projeto_atual = st.selectbox("🗂️ Selecione um projeto:", projetos)
 if "historico_projetos" not in st.session_state:
     st.session_state.historico_projetos = {p: [] for p in projetos}
 
-
-if "chat_history" not in st.session_state:
-    st.session_state.chat_history = []
 if "executar" not in st.session_state:
     st.session_state.executar = False
 if "pergunta_temp" not in st.session_state:
