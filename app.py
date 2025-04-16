@@ -56,9 +56,17 @@ if "pergunta_temp" not in st.session_state:
 def enviar():
     st.session_state.executar = True
     st.session_state.pergunta_temp = st.session_state.get("input_text", "")
+    st.session_state["input_text"] = ""  # limpa o campo após enviar
+
 
 # Campo de entrada (sem sobrescrever o valor)
-input_text = st.text_input("Digite sua pergunta aqui:", key="input_text", on_change=enviar)
+st.text_input(
+    "Digite sua pergunta aqui:",
+    value=st.session_state.get("input_text", ""),
+    key="input_text",
+    on_change=enviar
+)
+
 
 # Processa a pergunta apenas se a flag for verdadeira
 if st.session_state.executar and st.session_state.pergunta_temp:
