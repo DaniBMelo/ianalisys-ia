@@ -44,15 +44,27 @@ vectorstore = carregar_base()
 llm = ChatOpenAI(model="gpt-3.5-turbo", temperature=0)
 qa_chain = ConversationalRetrievalChain.from_llm(llm, retriever=vectorstore.as_retriever())
 
-# ===== Interface com o usuário =====
+
+# ===== Interface com o usuário (com botão de envio controlado) =====
+
 if "chat_history" not in st.session_state:
     st.session_state.chat_history = []
+
 if "input_text" not in st.session_state:
     st.session_state.input_text = ""
 
+if "enviar" not in st.session_state:
+    st.session_state.enviar = False
+
+# Campo de entrada de pergunta
 st.text_input("Digite sua pergunta aqui:", key="input_text")
 
-if st.session_state.input_text:
+# Botão para enviar a pergunta
+if st.button("Enviar pergunta"):
+    st.session_state.enviar = True
+
+# Processa a pergunta uma única vez
+if st.session_state.enviar and st.session_state.input_text:
     with st.spinner("Pensando..."):
         resultado = qa_chain({
             "question": st.session_state.input_text,
@@ -60,13 +72,14 @@ if st.session_state.input_text:
         })
         resposta = resultado['answer']
         st.session_state.chat_history.append((st.session_state.input_text, resposta))
-        st.session_state.input_text = ""  # limpa corretamente sem loop
-        st.rerun()
 
-# Exibe o histórico de conversa
+    # Limpa campo e flag para evitar loop
+    st.session_state.input_text = ""
+    st.session_state.enviar = False
+    st.rerun()
+
+# Exibe histórico
 if st.session_state.chat_history:
     st.markdown("---")
-    st.markdown("### 📂 Histórico de perguntas")
-    for i, (pergunta, resposta) in enumerate(reversed(st.session_state.chat_history)):
-        st.markdown(f"**{i+1}.** _{pergunta}_\n> {resposta}")
-
+    st.markdown("### 🗂️ Histórico de perguntas")
+    for i, (pergunta, resposta) in enumerate(reversed(st.session_state_
