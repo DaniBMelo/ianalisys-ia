@@ -107,7 +107,7 @@ if st.session_state.executar and st.session_state.pergunta_temp:
     st.session_state.pergunta_temp = ""
 
 # Exibe o histórico de conversa
-if st.session_state.chat_history:
+if st.session_state.historico_projetos.get(projeto_atual):
     st.markdown("---")
     st.markdown("### 📂 Histórico de perguntas")
     for i, (pergunta, resposta) in enumerate(reversed(st.session_state.chat_history)):
