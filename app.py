@@ -8,8 +8,8 @@ from langchain_openai import ChatOpenAI
 from langchain.chains import ConversationalRetrievalChain
 import os
 
-st.set_page_config(page_title="neuroIAnalytical - IA em Neuropsicanálise", layout="wide")
-st.title("🧠 neuroIAnalytical – IA em Neuropsicanálise e Autismo")
+st.set_page_config(page_title="IAnalysis - IA em Neuropsicanálise", layout="wide")
+st.title("🧠 Ianalysis – IA em Neuropsicanálise e Autismo")
 
 st.markdown("""
 Esta é uma inteligência artificial criada por Danila Melo, treinada com conteúdos específicos sobre neuropsicanálise e autismo.
