@@ -61,8 +61,8 @@ if st.button("Adicionar projeto"):
     elif novo_projeto:
         st.warning("⚠️ Esse projeto já existe.")
 
-projetos = ["Pacientes", "Dúvidas"]
-projeto_atual = st.selectbox("🗂️ Selecione um projeto:", projetos)
+projetos = list(st.session_state.historico_projetos.keys())
+projeto_atual = st.selectbox("🗂️ Selecione um projeto:", projetos, key="projeto_atual") 
 
 
 # Cria histórico para cada projeto se ainda não existir
