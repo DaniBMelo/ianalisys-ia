@@ -11,7 +11,7 @@ import os
 st.set_page_config(page_title="IAnalisys - Neuropsicanálise e Autismo", layout="wide")
 st.title("🧠 IAnalisys – IA em Neuropsicanálise e Autismo")
 st.markdown("""
-Esta é uma inteligência artificial treinada com conteúdos específicos sobre autismo e neuropsicanálise.
+Esta é uma inteligência artificial criada por Danila Melo, treinada com conteúdos específicos sobre autismo e neuropsicanálise.
 Faça uma pergunta abaixo para obter respostas baseadas nos textos embarcados.
 """)
 
@@ -44,27 +44,25 @@ vectorstore = carregar_base()
 llm = ChatOpenAI(model="gpt-3.5-turbo", temperature=0)
 qa_chain = ConversationalRetrievalChain.from_llm(llm, retriever=vectorstore.as_retriever())
 
-
 # ===== Interface com o usuário (com botão de envio controlado) =====
-
 if "chat_history" not in st.session_state:
     st.session_state.chat_history = []
-
 if "input_text" not in st.session_state:
     st.session_state.input_text = ""
+if "responder" not in st.session_state:
+    st.session_state.responder = False
 
-if "enviar" not in st.session_state:
-    st.session_state.enviar = False
+# Campo de entrada
+input_text = st.text_input("Digite sua pergunta aqui:", value=st.session_state.input_text, key="pergunta")
 
-# Campo de entrada de pergunta
-st.text_input("Digite sua pergunta aqui:", key="input_text")
+# Botão de envio
+if st.button("Perguntar"):
+    st.session_state.input_text = input_text
+    st.session_state.responder = True
+    st.rerun()
 
-# Botão para enviar a pergunta
-if st.button("Enviar pergunta"):
-    st.session_state.enviar = True
-
-# Processa a pergunta uma única vez
-if st.session_state.enviar and st.session_state.input_text:
+# Processamento da pergunta
+if st.session_state.responder:
     with st.spinner("Pensando..."):
         resultado = qa_chain({
             "question": st.session_state.input_text,
@@ -72,14 +70,14 @@ if st.session_state.enviar and st.session_state.input_text:
         })
         resposta = resultado['answer']
         st.session_state.chat_history.append((st.session_state.input_text, resposta))
+        st.session_state.input_text = ""
+        st.session_state.responder = False
+        st.rerun()
 
-    # Limpa campo e flag para evitar loop
-    st.session_state.input_text = ""
-    st.session_state.enviar = False
-    st.rerun()
-
-# Exibe histórico
+# Histórico
 if st.session_state.chat_history:
     st.markdown("---")
-    st.markdown("### 🗂️ Histórico de perguntas")
-    for i, (pergunta, resposta) in enumerate(reversed(st.session_state_
+    st.markdown("### 📂 Histórico de perguntas")
+    for i, (pergunta, resposta) in enumerate(reversed(st.session_state.chat_history)):
+        st.markdown(f"**{i+1}.** _{pergunta}_\n> {resposta}")
+
