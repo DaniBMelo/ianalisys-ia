@@ -54,12 +54,10 @@ projetos = ["Geral", "TEA adultos", "Neurodesenvolvimento", "Supervisão", "Outr
 st.markdown("### ➕ Criar novo projeto")
 novo_projeto = st.text_input("Nome do novo projeto:", key="novo_projeto_input")
 if st.button("Adicionar projeto"):
-    if "historico_projetos" not in st.session_state:
-        st.session_state.historico_projetos = {}
     if novo_projeto and novo_projeto not in st.session_state.historico_projetos:
         st.session_state.historico_projetos[novo_projeto] = []
+        st.session_state["projeto_atual"] = novo_projeto  # opcional: seleciona o novo projeto
         st.success(f"✅ Projeto '{novo_projeto}' adicionado com sucesso!")
-        st.experimental_rerun()
     elif novo_projeto:
         st.warning("⚠️ Esse projeto já existe.")
 
