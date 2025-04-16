@@ -48,29 +48,30 @@ llm = ChatOpenAI(model="gpt-3.5-turbo", temperature=0)
 qa_chain = ConversationalRetrievalChain.from_llm(llm, retriever=vectorstore.as_retriever())
 
 # ===== Interface com o usuário =====
+# Inicializa histórico de perguntas
 if "chat_history" not in st.session_state:
     st.session_state.chat_history = []
 
+# Campo de entrada
 user_input = st.text_input("Digite sua pergunta aqui:", key="input_pergunta")
 
+# Quando o usuário envia uma pergunta
 if user_input:
     with st.spinner("Pensando..."):
-        resultado = qa_chain({"question": user_input, "chat_history": st.session_state.chat_history})
+        resultado = qa_chain({
+            "question": user_input,
+            "chat_history": st.session_state.chat_history
+        })
         resposta = resultado['answer']
         st.session_state.chat_history.append((user_input, resposta))
-        st.session_state["input_pergunta"] = ""  # limpa a caixa de entrada
-        st.markdown(f"**🧠 IAnalisys:** {resposta}")
 
-    with st.spinner("Pensando..."):
-        resultado = qa_chain({"question": user_input, "chat_history": st.session_state.chat_history})
-        resposta = resultado['answer']
+    # Reinicia a interface para limpar o campo de texto
+    st.experimental_rerun()
 
-        st.session_state.chat_history.append((user_input, resposta))
-        st.markdown(f"**🧠 IAnalisys:** {resposta}")
-
-# Exibir histórico
+# Exibe o histórico de conversa
 if st.session_state.chat_history:
     st.markdown("---")
     st.markdown("### 🗂️ Histórico de perguntas")
     for i, (pergunta, resposta) in enumerate(reversed(st.session_state.chat_history)):
         st.markdown(f"**{i+1}.** _{pergunta}_\n> {resposta}")
+
