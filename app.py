@@ -110,5 +110,7 @@ if st.session_state.executar and st.session_state.pergunta_temp:
 if st.session_state.historico_projetos.get(projeto_atual):
     st.markdown("---")
     st.markdown("### 📂 Histórico de perguntas")
-    for i, (pergunta, resposta) in enumerate(reversed(st.session_state.chat_history)):
+    for i, (pergunta, resposta) in enumerate(reversed(st.session_state.historico_projetos[projeto_atual])):
+
+
         st.markdown(f"**{i+1}.** _{pergunta}_\n> {resposta}")
