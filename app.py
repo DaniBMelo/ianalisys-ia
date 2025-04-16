@@ -99,8 +99,8 @@ st.text_input(
 if st.session_state.executar and st.session_state.pergunta_temp:
     with st.spinner("Pensando..."):
         resultado = qa_chain({
-            "question": st.session_state.pergunta_temp,
-            "chat_history": st.session_state.chat_history
+        "question": st.session_state.pergunta_temp,
+        "chat_history": st.session_state.historico_projetos[projeto_atual]
         })
         resposta = resultado['answer']
     st.session_state.historico_projetos[projeto_atual].append((st.session_state.pergunta_temp, resposta))
