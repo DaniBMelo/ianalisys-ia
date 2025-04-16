@@ -48,15 +48,18 @@ llm = ChatOpenAI(model="gpt-3.5-turbo", temperature=0)
 qa_chain = ConversationalRetrievalChain.from_llm(llm, retriever=vectorstore.as_retriever())
 
 # ===== Interface com o usuário =====
-# Inicializa histórico de perguntas
+
+# Inicializa histórico e controle da última pergunta
 if "chat_history" not in st.session_state:
     st.session_state.chat_history = []
+if "last_question" not in st.session_state:
+    st.session_state.last_question = ""
 
-# Campo de entrada
+# Campo de entrada de pergunta
 user_input = st.text_input("Digite sua pergunta aqui:", key="input_pergunta")
 
-# Quando o usuário envia uma pergunta
-if user_input:
+# Processa nova pergunta (evita repetir após rerun)
+if user_input and user_input != st.session_state.last_question:
     with st.spinner("Pensando..."):
         resultado = qa_chain({
             "question": user_input,
@@ -64,9 +67,8 @@ if user_input:
         })
         resposta = resultado['answer']
         st.session_state.chat_history.append((user_input, resposta))
-
-    # Reinicia a interface para limpar o campo de texto
-    st.rerun()
+        st.session_state.last_question = user_input
+        st.rerun()  # limpa o campo e reinicia a interface
 
 # Exibe o histórico de conversa
 if st.session_state.chat_history:
@@ -74,4 +76,3 @@ if st.session_state.chat_history:
     st.markdown("### 🗂️ Histórico de perguntas")
     for i, (pergunta, resposta) in enumerate(reversed(st.session_state.chat_history)):
         st.markdown(f"**{i+1}.** _{pergunta}_\n> {resposta}")
-
