@@ -66,7 +66,7 @@ if user_input:
         st.session_state.chat_history.append((user_input, resposta))
 
     # Reinicia a interface para limpar o campo de texto
-    st.experimental_rerun()
+    st.rerun()
 
 # Exibe o histórico de conversa
 if st.session_state.chat_history:
