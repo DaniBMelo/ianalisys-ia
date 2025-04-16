@@ -46,6 +46,9 @@ llm = ChatOpenAI(model="gpt-3.5-turbo", temperature=0)
 qa_chain = ConversationalRetrievalChain.from_llm(llm, retriever=vectorstore.as_retriever())
 
 # ===== Interface com o usuário =====
+if "historico_projetos" not in st.session_state:
+    st.session_state.historico_projetos = {"Geral": []}  # começa com um projeto padrão
+
 # Lista de projetos (você pode expandir depois)
 projetos = ["Geral", "TEA adultos", "Neurodesenvolvimento", "Supervisão", "Outros"]
 
@@ -53,13 +56,10 @@ projetos = ["Geral", "TEA adultos", "Neurodesenvolvimento", "Supervisão", "Outr
 # ----- Cadastro de novo projeto -----
 st.markdown("### ➕ Criar novo projeto")
 novo_projeto = st.text_input("Nome do novo projeto:", key="novo_projeto_input")
-if st.button("Adicionar projeto"):
-    if novo_projeto and novo_projeto not in st.session_state.historico_projetos:
+if st.button("Adicionar projeto") and novo_projeto:
+    if novo_projeto not in st.session_state.historico_projetos:
         st.session_state.historico_projetos[novo_projeto] = []
-        st.session_state["projeto_atual"] = novo_projeto  # opcional: seleciona o novo projeto
-        st.success(f"✅ Projeto '{novo_projeto}' adicionado com sucesso!")
-    elif novo_projeto:
-        st.warning("⚠️ Esse projeto já existe.")
+        st.session_state.projeto_atual = novo_projeto  # seleciona o novo automaticamente
 
 projetos = list(st.session_state.historico_projetos.keys())
 projeto_atual = st.selectbox("🗂️ Selecione um projeto:", projetos, key="projeto_atual") 
