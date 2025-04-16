@@ -44,40 +44,35 @@ vectorstore = carregar_base()
 llm = ChatOpenAI(model="gpt-3.5-turbo", temperature=0)
 qa_chain = ConversationalRetrievalChain.from_llm(llm, retriever=vectorstore.as_retriever())
 
-# ===== Interface com o usuário (com botão de envio controlado) =====
+# ===== Interface com o usuário =====
 if "chat_history" not in st.session_state:
     st.session_state.chat_history = []
-if "input_text" not in st.session_state:
-    st.session_state.input_text = ""
-if "responder" not in st.session_state:
-    st.session_state.responder = False
 
-# Campo de entrada
-input_text = st.text_input("Digite sua pergunta aqui:", value=st.session_state.input_text, key="pergunta")
+if "user_input" not in st.session_state:
+    st.session_state.user_input = ""
 
-# Botão de envio
-if st.button("Perguntar"):
-    st.session_state.input_text = input_text
-    st.session_state.responder = True
-    st.rerun()
+if "executar" not in st.session_state:
+    st.session_state.executar = False
 
-# Processamento da pergunta
-if st.session_state.responder:
+def enviar():
+    st.session_state.executar = True
+
+st.text_input("Digite sua pergunta aqui:", key="user_input", on_change=enviar)
+
+if st.session_state.executar and st.session_state.user_input:
     with st.spinner("Pensando..."):
         resultado = qa_chain({
-            "question": st.session_state.input_text,
+            "question": st.session_state.user_input,
             "chat_history": st.session_state.chat_history
         })
         resposta = resultado['answer']
-        st.session_state.chat_history.append((st.session_state.input_text, resposta))
-        st.session_state.input_text = ""
-        st.session_state.responder = False
-        st.rerun()
+        st.session_state.chat_history.append((st.session_state.user_input, resposta))
+        st.session_state.user_input = ""
+        st.session_state.executar = False
 
-# Histórico
+# Exibe histórico
 if st.session_state.chat_history:
     st.markdown("---")
-    st.markdown("### 📂 Histórico de perguntas")
+    st.markdown("### 🗂️ Histórico de perguntas")
     for i, (pergunta, resposta) in enumerate(reversed(st.session_state.chat_history)):
         st.markdown(f"**{i+1}.** _{pergunta}_\n> {resposta}")
-
