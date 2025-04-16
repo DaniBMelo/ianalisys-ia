@@ -11,7 +11,7 @@ import os
 st.set_page_config(page_title="IAnalisys - Neuropsicanálise e Autismo", layout="wide")
 st.title("🧠 IAnalisys – IA em Neuropsicanálise e Autismo")
 st.markdown("""
-Esta é uma inteligência artificial treinada com conteúdos específicos sobre autismo e neuropsicanálise.
+Esta é uma inteligência artificial criada por Danila Melo, treinada com conteúdos específicos sobre neuropsicanálise e autismo.
 Faça uma pergunta abaixo para obter respostas baseadas nos textos embarcados.
 """)
 
