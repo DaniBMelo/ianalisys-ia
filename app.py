@@ -48,29 +48,36 @@ qa_chain = ConversationalRetrievalChain.from_llm(llm, retriever=vectorstore.as_r
 if "chat_history" not in st.session_state:
     st.session_state.chat_history = []
 
-if "user_input" not in st.session_state:
-    st.session_state.user_input = ""
-
 if "executar" not in st.session_state:
     st.session_state.executar = False
 
+if "pergunta_temp" not in st.session_state:
+    st.session_state.pergunta_temp = ""
+
+# Função chamada ao enviar
 def enviar():
     st.session_state.executar = True
+    st.session_state.pergunta_temp = st.session_state.input_text
 
-st.text_input("Digite sua pergunta aqui:", key="user_input", on_change=enviar)
+# Campo de entrada (valor controlado via input_text)
+st.text_input("Digite sua pergunta aqui:", key="input_text", on_change=enviar)
 
-if st.session_state.executar and st.session_state.user_input:
+# Só processa se a flag for True
+if st.session_state.executar and st.session_state.pergunta_temp:
     with st.spinner("Pensando..."):
         resultado = qa_chain({
-            "question": st.session_state.user_input,
+            "question": st.session_state.pergunta_temp,
             "chat_history": st.session_state.chat_history
         })
         resposta = resultado['answer']
-        st.session_state.chat_history.append((st.session_state.user_input, resposta))
-        st.session_state.user_input = ""
-        st.session_state.executar = False
+        st.session_state.chat_history.append((st.session_state.pergunta_temp, resposta))
 
-# Exibe histórico
+    # Limpa variáveis de controle
+    st.session_state.executar = False
+    st.session_state.pergunta_temp = ""
+    st.session_state.input_text = ""
+
+# Exibe o histórico de conversa
 if st.session_state.chat_history:
     st.markdown("---")
     st.markdown("### 🗂️ Histórico de perguntas")
