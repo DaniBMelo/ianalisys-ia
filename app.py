@@ -45,6 +45,17 @@ llm = ChatOpenAI(model="gpt-3.5-turbo", temperature=0)
 qa_chain = ConversationalRetrievalChain.from_llm(llm, retriever=vectorstore.as_retriever())
 
 # ===== Interface com o usuário =====
+# Lista de projetos (você pode expandir depois)
+projetos = ["Geral", "TEA adultos", "Neurodesenvolvimento", "Supervisão", "Outros"]
+
+# Seletor de projeto no topo
+projeto_atual = st.selectbox("🗂️ Selecione um projeto:", projetos)
+
+# Cria histórico para cada projeto se ainda não existir
+if "historico_projetos" not in st.session_state:
+    st.session_state.historico_projetos = {p: [] for p in projetos}
+
+
 if "chat_history" not in st.session_state:
     st.session_state.chat_history = []
 if "executar" not in st.session_state:
@@ -76,7 +87,7 @@ if st.session_state.executar and st.session_state.pergunta_temp:
             "chat_history": st.session_state.chat_history
         })
         resposta = resultado['answer']
-        st.session_state.chat_history.append((st.session_state.pergunta_temp, resposta))
+    st.session_state.historico_projetos[projeto_atual].append((st.session_state.pergunta_temp, resposta))
 
     # Limpa apenas as variáveis de controle (não sobrescreve o input controlado)
     st.session_state.executar = False
