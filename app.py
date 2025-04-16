@@ -49,7 +49,22 @@ qa_chain = ConversationalRetrievalChain.from_llm(llm, retriever=vectorstore.as_r
 projetos = ["Geral", "TEA adultos", "Neurodesenvolvimento", "Supervisão", "Outros"]
 
 # Seletor de projeto no topo
+# ----- Cadastro de novo projeto -----
+st.markdown("### ➕ Criar novo projeto")
+novo_projeto = st.text_input("Nome do novo projeto:", key="novo_projeto_input")
+if st.button("Adicionar projeto"):
+    if "historico_projetos" not in st.session_state:
+        st.session_state.historico_projetos = {}
+    if novo_projeto and novo_projeto not in st.session_state.historico_projetos:
+        st.session_state.historico_projetos[novo_projeto] = []
+        st.success(f"✅ Projeto '{novo_projeto}' adicionado com sucesso!")
+        st.experimental_rerun()
+    elif novo_projeto:
+        st.warning("⚠️ Esse projeto já existe.")
+
+projetos = ["Pacientes", "Dúvidas"]
 projeto_atual = st.selectbox("🗂️ Selecione um projeto:", projetos)
+
 
 # Cria histórico para cada projeto se ainda não existir
 if "historico_projetos" not in st.session_state:
