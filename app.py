@@ -11,7 +11,7 @@ import os
 st.set_page_config(page_title="IAnalisys - Neuropsicanálise e Autismo", layout="wide")
 st.title("🧠 IAnalisys – IA em Neuropsicanálise e Autismo")
 st.markdown("""
-Esta é uma inteligência artificial criada por Danila Melo, treinada com conteúdos específicos sobre neuropsicanálise e autismo.
+Esta é uma inteligência artificial treinada com conteúdos específicos sobre autismo e neuropsicanálise.
 Faça uma pergunta abaixo para obter respostas baseadas nos textos embarcados.
 """)
 
@@ -47,22 +47,20 @@ qa_chain = ConversationalRetrievalChain.from_llm(llm, retriever=vectorstore.as_r
 # ===== Interface com o usuário =====
 if "chat_history" not in st.session_state:
     st.session_state.chat_history = []
-
 if "executar" not in st.session_state:
     st.session_state.executar = False
-
 if "pergunta_temp" not in st.session_state:
     st.session_state.pergunta_temp = ""
 
 # Função chamada ao enviar
 def enviar():
     st.session_state.executar = True
-    st.session_state.pergunta_temp = st.session_state.input_text
+    st.session_state.pergunta_temp = st.session_state.get("input_text", "")
 
-# Campo de entrada (valor controlado via input_text)
-st.text_input("Digite sua pergunta aqui:", key="input_text", on_change=enviar)
+# Campo de entrada (sem sobrescrever o valor)
+input_text = st.text_input("Digite sua pergunta aqui:", key="input_text", on_change=enviar)
 
-# Só processa se a flag for True
+# Processa a pergunta apenas se a flag for verdadeira
 if st.session_state.executar and st.session_state.pergunta_temp:
     with st.spinner("Pensando..."):
         resultado = qa_chain({
@@ -72,14 +70,13 @@ if st.session_state.executar and st.session_state.pergunta_temp:
         resposta = resultado['answer']
         st.session_state.chat_history.append((st.session_state.pergunta_temp, resposta))
 
-    # Limpa variáveis de controle
+    # Limpa apenas as variáveis de controle (não sobrescreve o input controlado)
     st.session_state.executar = False
     st.session_state.pergunta_temp = ""
-    st.session_state.input_text = ""
 
 # Exibe o histórico de conversa
 if st.session_state.chat_history:
     st.markdown("---")
-    st.markdown("### 🗂️ Histórico de perguntas")
+    st.markdown("### 📂 Histórico de perguntas")
     for i, (pergunta, resposta) in enumerate(reversed(st.session_state.chat_history)):
         st.markdown(f"**{i+1}.** _{pergunta}_\n> {resposta}")
