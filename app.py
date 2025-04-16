@@ -51,9 +51,16 @@ qa_chain = ConversationalRetrievalChain.from_llm(llm, retriever=vectorstore.as_r
 if "chat_history" not in st.session_state:
     st.session_state.chat_history = []
 
-user_input = st.text_input("Digite sua pergunta aqui:", placeholder="Ex: Como a psicanálise interpreta o diagnóstico tardio de autismo?")
+user_input = st.text_input("Digite sua pergunta aqui:", key="input_pergunta")
 
-if st.button("Perguntar") and user_input:
+if user_input:
+    with st.spinner("Pensando..."):
+        resultado = qa_chain({"question": user_input, "chat_history": st.session_state.chat_history})
+        resposta = resultado['answer']
+        st.session_state.chat_history.append((user_input, resposta))
+        st.session_state["input_pergunta"] = ""  # limpa a caixa de entrada
+        st.markdown(f"**🧠 IAnalisys:** {resposta}")
+
     with st.spinner("Pensando..."):
         resultado = qa_chain({"question": user_input, "chat_history": st.session_state.chat_history})
         resposta = resultado['answer']
