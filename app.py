@@ -46,6 +46,12 @@ vectorstore = carregar_base()
 llm = ChatOpenAI(model="gpt-3.5-turbo", temperature=0)
 qa_chain = ConversationalRetrievalChain.from_llm(llm, retriever=vectorstore.as_retriever())
 
+# ===== Controle de tokens acumulados na sessão =====
+if "tokens_acumulados" not in st.session_state:
+    st.session_state.tokens_acumulados = 0
+if "custo_acumulado" not in st.session_state:
+    st.session_state.custo_acumulado = 0.0
+
 # ===== Interface com o usuário =====
 if "historico_projetos" not in st.session_state:
     st.session_state.historico_projetos = {"Geral": []}  # começa com um projeto padrão
@@ -127,7 +133,19 @@ if st.session_state.executar and st.session_state.pergunta_temp:
                 "chat_history": st.session_state.historico_projetos[projeto_atual]
             })
             resposta = resultado['answer']
-        st.markdown(f"🔢 **Tokens usados nesta resposta:** {cb.total_tokens}")
+        
+            # Atualiza os acumuladores
+            st.session_state.tokens_acumulados += cb.total_tokens
+        
+            # Estima custo com base no modelo
+            # (ajuste os valores se usar outro modelo)
+            custo_input = cb.prompt_tokens * 0.0005 / 1000
+            custo_output = cb.completion_tokens * 0.0015 / 1000
+            custo_total = custo_input + custo_output
+            st.session_state.custo_acumulado += custo_total
+
+            st.markdown(f"🔢 **Tokens usados nesta resposta:** {cb.total_tokens}")
+
 
     st.session_state.historico_projetos[projeto_atual].append((st.session_state.pergunta_temp, resposta))
 
@@ -141,3 +159,10 @@ if st.session_state.historico_projetos.get(projeto_atual):
     st.markdown("### 📂 Histórico de perguntas")
     for i, (pergunta, resposta) in enumerate(reversed(st.session_state.historico_projetos[projeto_atual])):
         st.markdown(f"**{i+1}.** _{pergunta}_\n> {resposta}")
+
+
+with st.sidebar:
+    st.markdown("## 💰 Monitor de uso")
+    st.markdown(f"**Modelo:** gpt-3.5-turbo")
+    st.markdown(f"**Tokens acumulados:** {st.session_state.tokens_acumulados}")
+    st.markdown(f"**Custo estimado:** ${st.session_state.custo_acumulado:.4f}")
