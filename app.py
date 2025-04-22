@@ -74,10 +74,17 @@ uploaded_file = st.file_uploader("Escolha um arquivo PDF ou DOCX", type=["pdf", 
 if uploaded_file is not None:
     file_type = uploaded_file.name.split(".")[-1].lower()
     with st.spinner("Processando arquivo..."):
+        import tempfile
+        # Salva o arquivo temporariamente
+        with tempfile.NamedTemporaryFile(delete=False, suffix=f".{file_type}") as tmp_file:
+            tmp_file.write(uploaded_file.read())
+            tmp_file_path = tmp_file.name
+        
+        # Carrega com o loader apropriado
         if file_type == "pdf":
-            loader = PyPDFLoader(uploaded_file)
+            loader = PyPDFLoader(tmp_file_path)
         elif file_type == "docx":
-            loader = UnstructuredWordDocumentLoader(uploaded_file)
+            loader = UnstructuredWordDocumentLoader(tmp_file_path)
         else:
             st.error("❌ Formato não suportado.")
             st.stop()
