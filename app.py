@@ -6,6 +6,7 @@ from langchain.vectorstores import FAISS
 from langchain.embeddings import OpenAIEmbeddings
 from langchain_openai import ChatOpenAI
 from langchain.chains import ConversationalRetrievalChain
+from langchain.callbacks import get_openai_callback
 import os
 
 st.set_page_config(page_title="IAnalysis - IA em Neuropsicanálise", layout="wide")
@@ -120,11 +121,14 @@ st.text_input(
 # Processa a pergunta apenas se a flag for verdadeira
 if st.session_state.executar and st.session_state.pergunta_temp:
     with st.spinner("Pensando..."):
-        resultado = qa_chain({
-        "question": st.session_state.pergunta_temp,
-        "chat_history": st.session_state.historico_projetos[projeto_atual]
-        })
-        resposta = resultado['answer']
+        with get_openai_callback() as cb:
+            resultado = qa_chain({
+                "question": st.session_state.pergunta_temp,
+                "chat_history": st.session_state.historico_projetos[projeto_atual]
+            })
+            resposta = resultado['answer']
+        st.markdown(f"🔢 **Tokens usados nesta resposta:** {cb.total_tokens}")
+
     st.session_state.historico_projetos[projeto_atual].append((st.session_state.pergunta_temp, resposta))
 
     # Limpa apenas as variáveis de controle (não sobrescreve o input controlado)
