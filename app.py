@@ -52,7 +52,6 @@ if "historico_projetos" not in st.session_state:
 # Lista de projetos (você pode expandir depois)
 projetos = ["Geral", "TEA adultos", "Neurodesenvolvimento", "Supervisão", "Outros"]
 
-# Seletor de projeto no topo
 # ----- Cadastro de novo projeto -----
 st.markdown("### ➕ Criar novo projeto")
 novo_projeto = st.text_input("Nome do novo projeto:", key="novo_projeto_input")
@@ -60,14 +59,37 @@ if st.button("Adicionar projeto") and novo_projeto:
     if novo_projeto not in st.session_state.historico_projetos:
         st.session_state.historico_projetos[novo_projeto] = []
         st.session_state.projeto_atual = novo_projeto  # seleciona o novo automaticamente
+        st.session_state.novo_projeto_input = ""
 
 projetos = list(st.session_state.historico_projetos.keys())
-projeto_atual = st.selectbox("🗂️ Selecione um projeto:", projetos, key="projeto_atual") 
-
+projeto_atual = st.selectbox("📂 Selecione um projeto:", projetos, key="projeto_atual")
 
 # Cria histórico para cada projeto se ainda não existir
 if "historico_projetos" not in st.session_state:
     st.session_state.historico_projetos = {p: [] for p in projetos}
+
+# ----- Upload de arquivos -----
+st.markdown("### 📂 Adicionar documento ao projeto atual")
+uploaded_file = st.file_uploader("Escolha um arquivo PDF ou DOCX", type=["pdf", "docx"])
+if uploaded_file is not None:
+    file_type = uploaded_file.name.split(".")[-1].lower()
+    with st.spinner("Processando arquivo..."):
+        if file_type == "pdf":
+            loader = PyPDFLoader(uploaded_file)
+        elif file_type == "docx":
+            loader = UnstructuredWordDocumentLoader(uploaded_file)
+        else:
+            st.error("❌ Formato não suportado.")
+            st.stop()
+
+        pages = loader.load()
+        splitter = RecursiveCharacterTextSplitter(chunk_size=1000, chunk_overlap=200)
+        docs = splitter.split_documents(pages)
+
+        embedding = OpenAIEmbeddings(openai_api_key=os.getenv("OPENAI_API_KEY"))
+        novo_vectorstore = FAISS.from_documents(docs, embedding=embedding)
+        qa_chain.retriever.vectorstore.merge_from(novo_vectorstore)
+        st.success("✅ Documento adicionado com sucesso à base de conhecimento!")
 
 if "executar" not in st.session_state:
     st.session_state.executar = False
@@ -80,7 +102,6 @@ def enviar():
     st.session_state.pergunta_temp = st.session_state.get("input_text", "")
     st.session_state["input_text"] = ""  # limpa o campo após enviar
 
-
 # Campo de entrada (sem sobrescrever o valor)
 st.text_input(
     "Digite sua pergunta aqui:",
@@ -88,7 +109,6 @@ st.text_input(
     key="input_text",
     on_change=enviar
 )
-
 
 # Processa a pergunta apenas se a flag for verdadeira
 if st.session_state.executar and st.session_state.pergunta_temp:
@@ -109,6 +129,4 @@ if st.session_state.historico_projetos.get(projeto_atual):
     st.markdown("---")
     st.markdown("### 📂 Histórico de perguntas")
     for i, (pergunta, resposta) in enumerate(reversed(st.session_state.historico_projetos[projeto_atual])):
-
-
         st.markdown(f"**{i+1}.** _{pergunta}_\n> {resposta}")
