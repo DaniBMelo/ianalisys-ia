@@ -62,11 +62,27 @@ projetos = ["Geral", "TEA adultos", "Neurodesenvolvimento", "Supervisão", "Outr
 # ----- Cadastro de novo projeto -----
 st.markdown("### ➕ Criar novo projeto")
 novo_projeto = st.text_input("Nome do novo projeto:", key="novo_projeto_input")
+
+if st.session_state.get("limpar_projeto_input"):
+    st.session_state["novo_projeto_input"] = ""
+    st.session_state["limpar_projeto_input"] = False
+
+
+if st.session_state.get("limpar_projeto_input"):
+    st.session_state["novo_projeto_input"] = ""
+    st.session_state["limpar_projeto_input"] = False
+    
 if st.button("Adicionar projeto") and novo_projeto:
+    if "historico_projetos" not in st.session_state:
+        st.session_state.historico_projetos = {}
+
     if novo_projeto not in st.session_state.historico_projetos:
         st.session_state.historico_projetos[novo_projeto] = []
         st.session_state.projeto_atual = novo_projeto  # seleciona o novo automaticamente
-        st.session_state.novo_projeto_input = ""
+        st.session_state["limpar_projeto_input"] = True  # define a flag para limpar depois
+        st.success(f"✅ Projeto '{novo_projeto}' adicionado com sucesso!")
+    else:
+        st.warning("⚠️ Esse projeto já existe.")
 
 projetos = list(st.session_state.historico_projetos.keys())
 projeto_atual = st.selectbox("📂 Selecione um projeto:", projetos, key="projeto_atual")
